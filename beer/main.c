@@ -45,6 +45,7 @@ typedef struct
     int purple3;
     int purple4;
     int purple5;
+    int line5;
 }Tdata;
 
 
@@ -122,6 +123,10 @@ void singleStat(Tdata *data,int colour,int combo){
             break;
     }
     //总倍率加当次倍率
+    if (combo >= 5 ){
+        data->line5 += 1 ;
+    }
+    
     data->multiple += nowMultiple;
 }
 
@@ -194,7 +199,7 @@ void FindRemoveNode(int (*containers)[arrayHigh],Point *treeRemoveArry ,int *tre
            //判断三消
             if (containers[i][k] != repetition){
                 if(combo >= treeRemove ){
-//                    printf("发生了横向三消起始坐标%d %d 结束坐标 %d %d 三消颜色为%d \n",i-combo,k,i,k,repetition);
+                   // printf("发生了横向三消起始坐标%d %d 结束坐标 %d %d 三消颜色为%d \n",i-combo,k,i,k,repetition);
                     //三消node记入数组
                     for (int j = 0; j < combo;j++) {
                         //printf("三消图形 %d  %d \n",i - j -1  ,k);
@@ -254,8 +259,8 @@ void FindRemoveNode(int (*containers)[arrayHigh],Point *treeRemoveArry ,int *tre
            //判断三消
            if (containers[i][x] != repetition){
                if(combo >= treeRemove ){
-//                   printf("发生了纵向三消起始坐标%d %d 结束坐标 %d %d 三消颜色为%d \n",i,x+combo,i,x+1,repetition);
-//                   //三消node记入数组
+                  // printf("发生了纵向三消起始坐标%d %d 结束坐标 %d %d 三消颜色为%d \n",i,x+combo,i,x+1,repetition);
+                   //三消node记入数组
                    for (int j = 0; j < combo;j++) {
                        //printf("三消图形 %d  %d \n",i,x + j +1);
                        treeRemoveArry[*treeRemoveArryCount].x =i;
@@ -331,7 +336,16 @@ void run (){
     //        {1,2,5,1,3,4,3,2,1,5,1,3,2,2,5,1,2,5,1,3,4,3,2,1,5,1,3,2,2,5},
     //        {4,4,2,4,2,4,3,2,1,5,2,2,2,2,5,4,4,2,4,2,4,3,2,1,5,2,2,2,2,5}
     //    };
-    
+
+//    int test[arrayWide*arrayHigh] = {4,5,1,3,2,1,1,1,1,4,4,1,3,5,4,3,1,4,2,3,2,3,5,5,3,1,3,3,4,4,1,2,5,3,1,4,5,4,5,5,1,3,4,1,3,4,1,4,1,1,1,4,3,1,5,1,5,3,5,5,2,5,1,4,1,5,4,2,1,4,5,4,2,2,4,2,3,3,1,5,1,3,3,1,5,1,5,4,3,2,1,1,2,2,1,3,3,2,1,3,2,4,1,5,3,5,5,5,4,5,4,5,5,1,4,2,4,3,4,3,1,2,5,4,1,5,1,1,3,5,1,1,3,5,5,3,5,5,3,3,2,2,1,1,4,2,3,4,1,1};
+//    for (int i=0,j=0 ;i <= arrayWide*arrayHigh;i = i + arrayHigh,j++){
+//        for (int k = i ; k <= i + arrayHigh -1 ;k++){
+//            containers[j][i + arrayHigh - 1 - k] = test[k];
+//                 //printf("---%d=%d=%d \n",k,i + arrayHigh - 1 - k,j);
+//        }
+//
+//    }
+
     //打印数组
     char output[1000]="";
     for (int i = 0 ;i < arrayWide;i++ ){
@@ -349,17 +363,22 @@ void run (){
         //生成移除数组
         Point treeRemoveArry[arrayHigh*arrayWide];
         int treeRemoveArryCount = 0;
+        //printArray(containers);
         FindRemoveNode(containers,treeRemoveArry,&treeRemoveArryCount,&data);
         alter(containers,treeRemoveArry,&treeRemoveArryCount);
+        if (treeRemoveArryCount == 0){
+            //当前屏无法消除情况下跳出
+            break;
+        }
         //printf("标注后\n");
         //printArray(containers);
         drop(containers,&data);
-        //printf("当前循环次数%d,下落次数%d\n",i+1,data.dropCount);
         //printf("下落后\n");
-        //printArray(containers);
+       // printArray(containers);
+        //printf("\n");
     }
     char sql[1000];
-    sprintf(sql,"INSERT INTO simulate (multiple,dropCount,allCount,green3,green4,green5,bule3,bule4,bule5,yellow3,yellow4,yellow5,red3,red4,red5,purple3,purple4,purple5,data)VALUES(%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,'{\"array\":[%s]}')",data.multiple, data.dropCount, data.allCount,data.green3,data.green4,data.green5,data.bule3,data.bule4,data.bule5, data.yellow3,data.yellow4,data.yellow5,data.red3,data.red4,data.red5,data.purple3,data.purple4,data.purple5,output);
+    sprintf(sql,"INSERT INTO simulate (multiple,dropCount,allCount,green3,green4,green5,bule3,bule4,bule5,yellow3,yellow4,yellow5,red3,red4,red5,purple3,purple4,purple5,line5,data)VALUES(%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,'{\"array\":[%s]}')",data.multiple, data.dropCount, data.allCount,data.green3,data.green4,data.green5,data.bule3,data.bule4,data.bule5, data.yellow3,data.yellow4,data.yellow5,data.red3,data.red4,data.red5,data.purple3,data.purple4,data.purple5,data.line5,output);
     char* cErrMsg;
     sqlite3_exec(pDB , sql ,0 ,0, &cErrMsg);
 }
@@ -373,7 +392,7 @@ int main(int argc, const char * argv[]) {
     }
 
     for(int i=0;i<1000000;i++){
-         printf("目前循环第 %d 次",i+1);
+         printf("目前循环第 %d 次 \n",i+1);
       run();
     }
 
